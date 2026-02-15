@@ -79,6 +79,7 @@ class CustomUserManager(BaseUserManager):
             email: str,
             first_name: str,
             last_name: str,
+            password: str = None,
             **kwargs: dict[str, Any],
     ) -> 'CustomUser':
         new_user: 'CustomUser' = self.__obtain_user(
@@ -87,6 +88,10 @@ class CustomUserManager(BaseUserManager):
             last_name=last_name,
             **kwargs,
         )
+        if password:
+            new_user.set_password(password)
+        else:
+            new_user.set_password("admin123")
         new_user.save(using=self._db)
         return new_user
 
