@@ -13,6 +13,12 @@ from rest_framework.exceptions import ValidationError
 # Project modules
 from apps.users.models import CustomUser
 
+# Loggers
+import logging
+
+logger = logging.getLogger("users")
+
+
 class UserLoginSerializer(Serializer):
     """
     Serializer for user login.
@@ -40,13 +46,15 @@ class UserLoginSerializer(Serializer):
         return value.lower()
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validates the input data."""
         email: str = attrs["email"]
         password: str = attrs["password"]
+
+        logger.debug("Validating login for email: %s", email)
 
         user: Optional[CustomUser] = CustomUser.objects.filter(email=email).first()
 
         if not user:
+            logger.warning("Login failed - user not found: %s", email)
             raise ValidationError(
                 detail={
                     "email": [f"User with email '{email}' does not exist."]
@@ -54,15 +62,17 @@ class UserLoginSerializer(Serializer):
             )
 
         if not user.check_password(raw_password=password):
+            logger.warning("Login failed - incorrect password for: %s", email)
             raise ValidationError(
                 detail={
                     "password": ["Incorrect password."]
                 }
             )
 
-        attrs["user"] = user
+        logger.debug("Login validation successful for: %s", email)
 
-        return super().validate(attrs)
+        attrs["user"] = user
+        return attrs
 
 
 class UserRegisterSerializer(Serializer):
@@ -87,18 +97,33 @@ class UserRegisterSerializer(Serializer):
     )
 
     class Meta:
-        Model = CustomUser
+        model = CustomUser
         """
         Validations of Serializer
         """
 
         fields = ('email', 'password' ,'first_name', 'last_name')
 
-    def validate(
-            self,
-            attrs: dict[str, Any],
-    ) -> dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        email = attrs.get("email")
+
+        logger.debug("Validating registration for email: %s", email)
+
+        if CustomUser.objects.filter(email=email).exists():
+            logger.warning("Registration failed - email already exists: %s", email)
+            raise ValidationError(
+                {"email": ["User with this email already exists."]}
+            )
+
         return attrs
 
+
     def create(self, validated_data):
-        return CustomUser.objects.create_user(**validated_data)
+        email = validated_data.get("email")
+        logger.debug("Creating user with email: %s", email)
+
+        user = CustomUser.objects.create_user(**validated_data)
+
+        logger.info("User created successfully in serializer: %s", user.email)
+
+        return user

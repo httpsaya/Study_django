@@ -4,7 +4,6 @@ import os
 import sys
 from decouple import config
 
-
 def main():
     """Run administrative tasks."""
     env_id = config("DJANGORLAR_ENV_ID", default='local')

@@ -9,6 +9,10 @@ from rest_framework.serializers import (
 from apps.blog.models import Post, Comment, Category, Tag
 from apps.abstracts.serializers import CustomUserForeignSerializer
 
+# Loggers
+import logging
+logger = logging.getLogger("blog")
+
 class PostBaseSerializer(ModelSerializer):
     """
     Base serializer for Post instances.
@@ -47,9 +51,6 @@ class PostListSerializer(PostBaseSerializer):
 
 
 class PostCreateSerializer(PostBaseSerializer):
-    """
-    Serializer for creating Post instances.
-    """
 
     class Meta:
         model = Post
@@ -62,11 +63,32 @@ class PostCreateSerializer(PostBaseSerializer):
             "status",
         )
 
+    def create(self, validated_data):
+        logger.debug(
+            "Creating post with title: %s",
+            validated_data.get("title")
+        )
+
+        try:
+            post = super().create(validated_data)
+
+            logger.info(
+                "Post created in serializer: %s (ID: %s)",
+                post.title,
+                post.id
+            )
+
+            return post
+
+        except Exception:
+            logger.exception(
+                "Unexpected error while creating post: %s",
+                validated_data.get("title")
+            )
+            raise
+
 
 class PostUpdateSerializer(PostBaseSerializer):
-    """
-    Serializer for updating Post instances.
-    """
 
     class Meta:
         model = Post
@@ -77,11 +99,34 @@ class PostUpdateSerializer(PostBaseSerializer):
             "status",
         )
 
+    def update(self, instance, validated_data):
+        logger.debug(
+            "Updating post: %s (ID: %s)",
+            instance.slug,
+            instance.id
+        )
+
+        try:
+            post = super().update(instance, validated_data)
+
+            logger.info(
+                "Post updated in serializer: %s (ID: %s)",
+                post.slug,
+                post.id
+            )
+
+            return post
+
+        except Exception:
+            logger.exception(
+                "Unexpected error while updating post: %s",
+                instance.slug
+            )
+            raise
+
 
 class CommentSerializer(ModelSerializer):
-    """
-    Serializer for Comment instances.
-    """
+
     author = CustomUserForeignSerializer(read_only=True)
 
     class Meta:
@@ -94,3 +139,21 @@ class CommentSerializer(ModelSerializer):
             "created_at",
         )
         read_only_fields = ("id", "post", "author", "created_at")
+
+    def create(self, validated_data):
+        logger.debug("Creating comment")
+
+        try:
+            comment = super().create(validated_data)
+
+            logger.info(
+                "Comment created (ID: %s) for post ID: %s",
+                comment.id,
+                comment.post.id
+            )
+
+            return comment
+
+        except Exception:
+            logger.exception("Unexpected error while creating comment")
+            raise

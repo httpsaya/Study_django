@@ -13,7 +13,12 @@ from rest_framework.exceptions import ValidationError
 
 # Project modules
 from apps.users.models import CustomUser
-from apps.users.serializers import UserLoginSerializer
+from apps.users.serializers import UserLoginSerializer, UserRegisterSerializer
+
+# Loggers
+import logging
+logger = logging.getLogger('users')
+
 
 class UserViewSet(ViewSet):
 
@@ -30,25 +35,42 @@ class UserViewSet(ViewSet):
             *args: tuple[Any, ...],
             **kwargs: dict[str, Any],
     ) -> DRFResponse:
-        """ Doing login endpoint """
+        """ Doing registration endpoint """
 
-        serializer: UserLoginSerializer = UserLoginSerializer(data=request.data)
+        email = request.data.get("email")
+        logger.info("Registration attempt for email: %s", email)
 
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer: UserRegisterSerializer = UserRegisterSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
 
-        user = serializer.save()
+            user = serializer.save()
 
-        refresh_token: RefreshToken = RefreshToken.for_user(user)
-        access_token: str = str(refresh_token.access_token)
+            logger.info("User registered successfully: %s", user.email)
 
-        return DRFResponse(
-            data={
-                'first_name': user.first_name,
-                'access': access_token,
-                'refresh': str(refresh_token)
-            },
-            status=HTTP_200_OK
-        )
+            refresh_token: RefreshToken = RefreshToken.for_user(user)
+            access_token: str = str(refresh_token.access_token)
+
+            return DRFResponse(
+                data={
+                    'first_name': user.first_name,
+                    'access': access_token,
+                    'refresh': str(refresh_token)
+                },
+                status=HTTP_200_OK
+            )
+
+        except ValidationError as e:
+            logger.warning(
+                "Registration failed for email: %s | Errors: %s",
+                email,
+                str(e)
+            )
+            raise
+
+        except Exception:
+            logger.exception("Unexpected error during registration for email: %s", email)
+            raise
 
     @action(
         methods=("POST",),
@@ -66,23 +88,38 @@ class UserViewSet(ViewSet):
         """
         Handle user login.
         """
+        email = request.data.get("email")
+        logger.info("Login attempt for email: %s", email)
 
-        serializer: UserLoginSerializer = UserLoginSerializer(data=request.data)
+        try:
+            serializer: UserLoginSerializer = UserLoginSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
 
-        serializer.is_valid(raise_exception=True)
+            user: CustomUser = serializer.validated_data.pop("user")
 
-        user: CustomUser = serializer.validated_data.pop("user")
+            logger.info("Login successful for email: %s", user.email)
 
-        # Generate JWT tokens
-        refresh_token: RefreshToken = RefreshToken.for_user(user)
-        access_token: str = str(refresh_token.access_token)
+            refresh_token: RefreshToken = RefreshToken.for_user(user)
+            access_token: str = str(refresh_token.access_token)
 
-        return DRFResponse(
-            data={
-                "id": user.id,
-                "email": user.email,
-                "access": access_token,
-                "refresh": str(refresh_token),
-            },
-            status=HTTP_200_OK
-        )
+            return DRFResponse(
+                data={
+                    "id": user.id,
+                    "email": user.email,
+                    "access": access_token,
+                    "refresh": str(refresh_token),
+                },
+                status=HTTP_200_OK
+            )
+
+        except ValidationError as e:
+            logger.warning(
+                "Login failed for email: %s | Errors: %s",
+                email,
+                str(e)
+            )
+            raise
+
+        except Exception:
+            logger.exception("Unexpected error during login for email: %s", email)
+            raise

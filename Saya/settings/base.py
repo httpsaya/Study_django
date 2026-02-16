@@ -1,5 +1,6 @@
 # Python modules
 import os
+from pathlib import Path
 from datetime import timedelta
 
 # Project modules
@@ -10,7 +11,7 @@ from decouple import config
 # ----------------------------------------------
 # Path
 #
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).resolve().parent.parent
 ROOT_URLCONF = 'settings.urls'
 WSGI_APPLICATION = 'settings.wsgi.application'
 ASGI_APPLICATION = "settings.asgi.application"
@@ -45,6 +46,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'settings.middleware.DebugRequestLoggingMiddleware',
 ]
 TEMPLATES = [
     {
@@ -162,4 +164,93 @@ SIMPLE_JWT = {
     "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    # -------------------
+    # FORMATTERS
+    # -------------------
+    'formatters': {
+        'simple': {
+            'format': '%(levelname)s %(message)s',
+        },
+        'verbose': {
+            'format': '%(asctime)s %(levelname)s [%(name)s] '
+                      '%(module)s: %(message)s',
+        },
+    },
+
+    # -------------------
+    # FILTERS
+    # -------------------
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+
+    # -------------------
+    # HANDLERS
+    # -------------------
+    'handlers': {
+        # Console handler
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'DEBUG',
+            'formatter': 'simple',
+        },
+
+        # Main rotating file handler
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'level': 'WARNING',
+            'formatter': 'verbose',
+            'filename': os.path.join(BASE_DIR, 'logs/app.log'),
+            'maxBytes': 5 * 1024 * 1024,  # 5 MB
+            'backupCount': 3,
+        },
+
+        # Debug-only request logger
+        'debug_requests': {
+            'class': 'logging.FileHandler',
+            'level': 'DEBUG',
+            'formatter': 'verbose',
+            'filename': os.path.join(BASE_DIR, 'logs/debug_requests.log'),
+            'filters': ['require_debug_true'],  # Only active when DEBUG=True
+        },
+    },
+
+    # -------------------
+    # LOGGERS
+    # -------------------
+    'loggers': {
+        # Your apps
+        'users': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'blog': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+
+        # Django request errors
+        'django.request': {
+            'handlers': ['file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+
+        # Debug request logger
+        'debug_requests': {
+            'handlers': ['debug_requests'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
 }
