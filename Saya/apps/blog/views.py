@@ -29,12 +29,14 @@ from apps.blog.serializers import (
     PostCreateSerializer,
     PostUpdateSerializer,
     CommentSerializer,
+PostErrorSerializer,
 )
 
 # Loggers
 import logging
-
 logger = logging.getLogger("blog")
+
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 
 class PostViewSet(ViewSet):
@@ -46,6 +48,25 @@ class PostViewSet(ViewSet):
     queryset = Post.objects.all()
     lookup_field = 'slug'
 
+    @extend_schema(
+        summary="Get Posts",
+        # description="My custom deprecation reason",
+        request=PostListSerializer,
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Successfully get posts",
+
+            ),
+            HTTP_403_FORBIDDEN: OpenApiResponse(
+                description="No posts",
+                response=PostErrorSerializer,
+            ),
+            HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Wrong something for posts",
+                response=PostErrorSerializer,
+            ),
+        }
+    )
     def list(self, request: DRFRequest) -> DRFResponse:
         """GET posts"""
 
@@ -56,6 +77,22 @@ class PostViewSet(ViewSet):
         serializer = PostListSerializer(posts, many=True)
         return DRFResponse(data=serializer.data, status=HTTP_200_OK)
 
+
+    @extend_schema(
+        summary="Creating Posts",
+        # description="My custom deprecation reason",
+        request=PostCreateSerializer,
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Successfully created posts",
+
+            ),
+            HTTP_403_FORBIDDEN: OpenApiResponse(
+                description="No posts",
+                # response=UserErrorSerializer,
+            )
+        }
+    )
     def create(self, request: DRFRequest) -> DRFResponse:
         """POST Posts"""
 

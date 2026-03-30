@@ -2,6 +2,7 @@
 from typing import Any
 
 # Django modules
+from django.utils.translation import gettext_lazy as _
 from django.db.models import (
     EmailField,
     CharField,
@@ -108,7 +109,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin, Abstact):
         unique=True,
         db_index=True,
         # validators=[validate_email_domain],
-        verbose_name="Email address",
+        verbose_name=_("Email Field"),
         help_text="User's email address",
     )
     first_name = CharField(

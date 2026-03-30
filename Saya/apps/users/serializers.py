@@ -5,7 +5,8 @@ from typing import Any, Optional
 from rest_framework.serializers import (
     Serializer,
     CharField,
-    EmailField
+    EmailField,
+ListField
 )
 from rest_framework.exceptions import ValidationError
 
@@ -127,3 +128,17 @@ class UserRegisterSerializer(Serializer):
         logger.info("User created successfully in serializer: %s", user.email)
 
         return user
+
+
+class UserErrorSerializer(Serializer):
+    email = ListField(
+        child=CharField(),
+        required=False,
+    )
+    class Meta:
+        """Customization of the Serializer metadata."""
+
+        fields = (
+            "email",
+        )
+

@@ -157,3 +157,16 @@ class CommentSerializer(ModelSerializer):
         except Exception:
             logger.exception("Unexpected error while creating comment")
             raise
+
+
+class PostErrorSerializer(PostBaseSerializer):
+    class Meta:
+        model = Post
+        fields = (
+            "id",
+            "title",
+            "category",
+            "slug",
+            "tags",
+            "status",
+        )

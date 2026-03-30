@@ -27,6 +27,8 @@ DJANGO_AND_THIRD_PARTY_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+'drf_spectacular',
+'debug_toolbar',
 ]
 PROJECT_APPS = [
     "apps.abstracts.apps.AbstractsConfig",
@@ -47,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'settings.middleware.DebugRequestLoggingMiddleware',
+'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 TEMPLATES = [
     {
@@ -83,8 +86,21 @@ AUTH_PASSWORD_VALIDATORS = [
 #
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
-USE_I18N = True
+USE_I18N = True  # Turn on translation system
+USE_L10N = True  # Format dates, numbers and calendars according to the current locale
 USE_TZ = True
+
+ENGLISH_LANGUAGE_CODE = "en"
+
+LANGUAGES = [
+    ("en", "English"),
+    ("kz", "Kazakh"),
+    ("ru", "Russian"),
+]
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
 
 # ----------------------------------------------
 # Static | Media
@@ -103,9 +119,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
 }
 from datetime import timedelta
 

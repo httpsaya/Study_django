@@ -6,22 +6,48 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.viewsets import ViewSet
 from rest_framework.request import Request as DRFRequest
 from rest_framework.response import Response as DRFResponse
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import (
+    HTTP_200_OK,
+    HTTP_400_BAD_REQUEST,
+    HTTP_405_METHOD_NOT_ALLOWED)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 
 # Project modules
 from apps.users.models import CustomUser
-from apps.users.serializers import UserLoginSerializer, UserRegisterSerializer
+from apps.users.serializers import (
+    UserLoginSerializer, UserRegisterSerializer, UserErrorSerializer)
 
 # Loggers
 import logging
 logger = logging.getLogger('users')
 
+# Swagger modules
+from drf_spectacular.utils import extend_schema, OpenApiResponse
+
+
 
 class UserViewSet(ViewSet):
 
+    @extend_schema(
+        summary="User Registration",
+        # description="My custom deprecation reason",
+        request=UserRegisterSerializer,
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Successful login returns user data along with access and refresh tokens.",
+
+            ),
+            HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Bad request due to invalid input data.",
+                response=UserErrorSerializer,
+            ),
+            HTTP_405_METHOD_NOT_ALLOWED: OpenApiResponse(
+                description="Method not allowed. You used wrong HTTP request type. Only POST can be used to reach this endpoint.",
+            )
+        }
+    )
     @action(
         methods=("POST",),
         detail=False,
@@ -72,6 +98,22 @@ class UserViewSet(ViewSet):
             logger.exception("Unexpected error during registration for email: %s", email)
             raise
 
+    @extend_schema(
+        summary="User Login",
+        # description="My custom deprecation reason",
+        request=UserLoginSerializer,
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Successful login returns user data along with access and refresh tokens.",
+            ),
+            HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Bad request due to invalid input data.",
+            ),
+            HTTP_405_METHOD_NOT_ALLOWED: OpenApiResponse(
+                description="Method not allowed. You used wrong HTTP request type. Only POST can be used to reach this endpoint.",
+            )
+        }
+    )
     @action(
         methods=("POST",),
         detail=False,
