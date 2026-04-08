@@ -4,7 +4,6 @@ from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('apps.users.urls')),
@@ -12,6 +11,8 @@ urlpatterns = [
 
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
+
+    path('', include('apps.integers.urls'))
 
 ]
 if settings.DEBUG:

@@ -1,21 +1,19 @@
+altgraph @ file:///AppleInternal/Library/BuildRoots/4~CGYkugDNMJDPussZJfa8Q7q7wDj7yZMIh_VI6H4/Library/Caches/com.apple.xbs/Sources/python3/altgraph-0.17.2-py2.py3-none-any.whl
 asgiref==3.11.1
-attrs==25.4.0
-Django==5.0
-django-debug-toolbar==6.2.0
+async-timeout==5.0.1
+channels==4.3.2
+channels_redis==4.3.0
+distlib==0.3.9
+Django==4.2.20
 djangorestframework==3.16.1
-djangorestframework_simplejwt==5.5.1
-drf-spectacular==0.29.0
-include==0.2.2
-inflection==0.5.1
-jsonschema==4.26.0
-jsonschema-specifications==2025.9.1
-pillow==12.1.1
-psycopg2-binary==2.9.11
-PyJWT==2.11.0
-python-decouple==3.8
-PyYAML==6.0.3
-referencing==0.37.0
-rpds-py==0.30.0
-sqlparse==0.5.5
-typing_extensions==4.15.0
-uritemplate==4.2.0
+filelock==3.18.0
+future @ file:///AppleInternal/Library/BuildRoots/4~CGYkugDNMJDPussZJfa8Q7q7wDj7yZMIh_VI6H4/Library/Caches/com.apple.xbs/Sources/python3/future-0.18.2-py3-none-any.whl
+macholib @ file:///AppleInternal/Library/BuildRoots/4~CGYkugDNMJDPussZJfa8Q7q7wDj7yZMIh_VI6H4/Library/Caches/com.apple.xbs/Sources/python3/macholib-1.15.2-py2.py3-none-any.whl
+msgpack==1.1.2
+platformdirs==4.3.6
+redis==7.0.1
+six @ file:///AppleInternal/Library/BuildRoots/4~CGYkugDNMJDPussZJfa8Q7q7wDj7yZMIh_VI6H4/Library/Caches/com.apple.xbs/Sources/python3/six-1.15.0-py2.py3-none-any.whl
+sqlparse==0.5.3
+typing_extensions==4.12.2
+vboxapi==1.0
+virtualenv==20.29.3

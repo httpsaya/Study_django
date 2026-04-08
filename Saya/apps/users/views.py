@@ -50,7 +50,7 @@ class UserViewSet(ViewSet):
     )
     @action(
         methods=("POST",),
-        detail=False,
+        detail=False, 
         url_path='register',
         url_name='register',
         permission_classes=(AllowAny,)

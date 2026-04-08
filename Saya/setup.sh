@@ -9,7 +9,7 @@ if [ ! -d "venv" ]; then
     uv venv venv --python 3.12
 fi
 source ./venv/bin/activate
-uv pip install -r requirements.txt
+uv pip install -r ./requirements/prod.txt
 echo "✅ Virtualenv created and dependencies installed."
 
 ################################################
@@ -19,7 +19,7 @@ docker system prune -f
 ################################################
 # 2. Create an .env file with SECRET_KEY and ADMIN_SITE_URL variables
 
-./setup_env_file.sh
+# ./setup_env_file.sh
 
 echo "✅ settings/env created."
 
@@ -117,3 +117,4 @@ echo "✅ Pre-commit hooks installed and checked."
 ################################################
 # 12. Done
 echo "✅ Setup is complete."
+
